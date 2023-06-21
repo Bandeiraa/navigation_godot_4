@@ -1,0 +1,7 @@
+config_version=5
+
+[application]
+
+config/name="navigation_2D_initial_project"
+config/features=PackedStringArray("4.0", "Forward Plus")
+config/icon="res://icon.svg"

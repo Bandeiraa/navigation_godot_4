@@ -1,0 +1,128 @@
+[gd_scene load_steps=10 format=3 uid="uid://b8hac2nu14ir6"]
+
+[ext_resource type="Texture2D" uid="uid://dgqcm3vv8sydp" path="res://entities/assets/torch_goblin.png" id="1_gxvjm"]
+[ext_resource type="Script" path="res://entities/scripts/torch_goblin.gd" id="1_v4rou"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hp1cg"]
+size = Vector2(50, 14)
+
+[sub_resource type="Animation" id="Animation_1gfeg"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Texture:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [0]
+}
+
+[sub_resource type="Animation" id="Animation_8pcaj"]
+resource_name = "attack"
+length = 0.6
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Texture:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [14, 15, 16, 17, 18, 19]
+}
+
+[sub_resource type="Animation" id="Animation_66xo2"]
+resource_name = "idle"
+length = 0.7
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Texture:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [0, 1, 2, 3, 4, 5, 6]
+}
+
+[sub_resource type="Animation" id="Animation_fsavd"]
+resource_name = "walk"
+length = 0.6
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath("Texture:frame")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 0.1, 0.2, 0.3, 0.4, 0.5),
+"transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1),
+"update": 1,
+"values": [7, 8, 9, 10, 11, 12]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_432u3"]
+_data = {
+"RESET": SubResource("Animation_1gfeg"),
+"attack": SubResource("Animation_8pcaj"),
+"idle": SubResource("Animation_66xo2"),
+"walk": SubResource("Animation_fsavd")
+}
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_emm31"]
+radius = 240.0
+
+[node name="TorchGoblin" type="CharacterBody2D" node_paths=PackedStringArray("_sprite", "_animation", "_navigation_agent", "_respawn_timer")]
+script = ExtResource("1_v4rou")
+_sprite = NodePath("Texture")
+_animation = NodePath("Animation")
+_navigation_agent = NodePath("NavigationAgent")
+_respawn_timer = NodePath("RespawnTimer")
+
+[node name="Texture" type="Sprite2D" parent="."]
+position = Vector2(0, -31)
+texture = ExtResource("1_gxvjm")
+hframes = 7
+vframes = 3
+
+[node name="Collision" type="CollisionShape2D" parent="."]
+visible = false
+show_behind_parent = true
+position = Vector2(0, -1)
+shape = SubResource("RectangleShape2D_hp1cg")
+
+[node name="Animation" type="AnimationPlayer" parent="."]
+libraries = {
+"": SubResource("AnimationLibrary_432u3")
+}
+
+[node name="NavigationAgent" type="NavigationAgent2D" parent="."]
+path_postprocessing = 1
+avoidance_enabled = true
+radius = 32.0
+
+[node name="DetectionArea" type="Area2D" parent="."]
+show_behind_parent = true
+
+[node name="Collision" type="CollisionShape2D" parent="DetectionArea"]
+shape = SubResource("CircleShape2D_emm31")
+
+[node name="RespawnTimer" type="Timer" parent="."]
+wait_time = 1.5
+one_shot = true
+
+[connection signal="animation_finished" from="Animation" to="." method="_on_animation_finished"]
+[connection signal="velocity_computed" from="NavigationAgent" to="." method="_on_navigation_agent_velocity_computed"]
+[connection signal="body_entered" from="DetectionArea" to="." method="_on_detection_area_body_entered"]
+[connection signal="body_exited" from="DetectionArea" to="." method="_on_detection_area_body_exited"]
+[connection signal="timeout" from="RespawnTimer" to="." method="_on_respawn_timer_timeout"]
